@@ -1,0 +1,103 @@
+<!-- development version, includes helpful console warnings -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.26.1/axios.min.js"
+	integrity="sha512-bPh3uwgU5qEMipS/VOmRqynnMXGGSRv+72H/N260MQeXZIK4PG48401Bsby9Nq5P5fz7hy5UGNmC/W1Z51h2GQ=="
+	crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<div id="app">
+	<h2>
+		Hello world in Vue
+	</h2>
+	<p>{{message}}</p>
+	<button v-on:click="reverseMessage">Rev</button>
+	<h2>Looping</h2>
+	<button v-on:click="loadData">Load Data</button>
+	<ul>
+		<li v-for="todo in todos">
+			{{todo.pk}} {{ todo.todo }}
+			<button v-on:click="editTodo(todo)">Edit</button>
+			<button v-on:click="deleteTodo(todo)">Delete</button>
+		</li>
+	</ul>
+	<h3>Add one more</h3>
+	<p>{{todo}}</p>
+	<input v-model="todo" />
+	<button v-on:click="saveThisTodo">Save This Todo</button>
+	<br>
+	<button v-on:click="updateTodo">Update</button>
+</div>
+<script>
+	var headers = { 'Content-Type': 'multipart/form-data' }
+	var app = new Vue({
+		el: '#app',
+		data: {
+			message: 'hello world',
+			todos: [
+				{
+					pk: 1,
+					todo: 'todo1',
+					is_done: false,
+				},
+				{
+					pk: 2,
+					todo: 'todo2',
+					is_done: false,
+				},
+				{
+					pk: 1,
+					todo: 'todo3',
+					is_done: false,
+				},
+			],
+			todo: null,
+			pk: null,
+		},
+		methods: {
+			reverseMessage: function () {
+				this.message = this.message.split('').reverse().join('')
+			},
+			loadData: function () {
+				var that = this
+				axios.get('http://localhost:8000/').then(function (response) {
+					console.log(response)
+					that.todos = response.data
+				})
+			},
+			saveThisTodo: function () {
+				var that = this
+				var todoData = new FormData();
+				todoData.append('todo', this.todo)
+				axios.post('http://localhost:8000/api/todo/create/', todoData, headers).then(function (response) {
+					console.log(response)
+					console.log('Saved')
+					that.loadData()
+				})
+			},
+			updateTodo: function () {
+				var todoData = new FormData();
+				todoData.append('todo', this.todo)
+				var that = this
+				axios.put('http://localhost:8000/api/todo/update/' + this.pk, todoData, headers).then(function (response) {
+					console.log(response)
+					console.log('Updated')
+					that.loadData()
+				})
+			},
+			editTodo: function (item) {
+				console.log('Oh yeah: its time for edit')
+				this.todo = item.todo
+				this.pk = item.pk
+			},
+			deleteTodo: function (item) {
+				var that = this
+				axios.delete('http://localhost:8000/api/todo/delete/' + item.pk, headers).then(function (response) {
+					console.log(response)
+					console.log('Saved')
+					that.loadData()
+				})
+			}
+		},
+		mounted: function () {
+			this.loadData()
+		}
+	})
+</script>
