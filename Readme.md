@@ -2,6 +2,7 @@
 
 This is a dummy project only, used for refreshing my knowledge.
 
+See blog post to get some idea
 https://dev.to/ajeebkp23/a-simple-crud-in-django-vue-4096
 
 # How to serve index.html
